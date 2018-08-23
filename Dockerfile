@@ -1,50 +1,30 @@
-FROM lsiobase/alpine:3.8
+FROM alpine:3.8 as buildstage
 
-# set version label
-ARG BUILD_DATE
-ARG VERSION
-LABEL build_version="Linuxserver.io version:- ${VERSION} Build-date:- ${BUILD_DATE}"
-LABEL maintainer="sparklyballs"
+ARG ZNC_VER="master"
 
-# package version
-ARG ZNC_VER="latest"
+# download build dependencies
+RUN apk add --no-cache autoconf automake c-ares-dev curl cyrus-sasl-dev g++ gcc gettext-dev git icu-dev make openssl-dev perl-dev python3-dev swig tar tcl-dev git
 
-RUN \
- echo "**** install build packages ****" && \
- apk add --no-cache --virtual=build-dependencies \
-	autoconf \
-	automake \
-	c-ares-dev \
-	curl \
-	cyrus-sasl-dev \
-	g++ \
-	gcc \
-	gettext-dev \
-	git \
-	icu-dev \
-	make \
-	openssl-dev \
-	perl-dev \
-	python3-dev \
-	swig \
-	tar \
-	tcl-dev && \
- echo "**** compile znc ****" && \
- mkdir -p /tmp/znc && \
- curl -o /tmp/znc-src.tar.gz -L "http://znc.in/nightly/znc-${ZNC_VER}.tar.gz" && \
- tar xf /tmp/znc-src.tar.gz -C /tmp/znc --strip-components=1 && \
- curl -o /tmp/playback.tar.gz -L https://github.com/jpnurmi/znc-playback/archive/master.tar.gz && \
- tar xf /tmp/playback.tar.gz -C /tmp/znc/modules --strip-components=1 && \
- 
- curl -o /tmp/znc-push.tar.gz -L https://github.com/jreese/znc-push/archive/master.tar.gz && \
- tar xf /tmp/znc-push.tar.gz -C /tmp/znc/modules --strip-components=1 && \
+# download znc
+RUN git clone --recursive --depth 1 --branch $ZNC_VER https://github.com/znc/znc.git /tmp/znc
 
- curl -o /tmp/znc-clientbuffer.tar.gz -L https://github.com/CyberShadow/znc-clientbuffer/archive/master.tar.gz && \
- tar xf /tmp/znc-clientbuffer.tar.gz -C /tmp/znc/modules --strip-components=1 && \
+# download playback plugin
+RUN curl -o /tmp/playback.tar.gz -L https://github.com/jpnurmi/znc-playback/archive/master.tar.gz
+RUN tar xf /tmp/playback.tar.gz -C /tmp/znc/modules --strip-components=1
 
- cd /tmp/znc && \
- export CFLAGS="$CFLAGS -D_GNU_SOURCE" && \
- ./configure \
+# download znc-push plugin
+RUN curl -o /tmp/znc-push.tar.gz -L https://github.com/jreese/znc-push/archive/master.tar.gz
+RUN tar xf /tmp/znc-push.tar.gz -C /tmp/znc/modules --strip-components=1
+
+# download znc-clientbuffer
+RUN curl -o /tmp/znc-clientbuffer.tar.gz -L https://github.com/CyberShadow/znc-clientbuffer/archive/master.tar.gz
+RUN tar xf /tmp/znc-clientbuffer.tar.gz -C /tmp/znc/modules --strip-components=1
+
+# compile znc
+WORKDIR /tmp/znc
+ENV CFLAGS="$CFLAGS -D_GNU_SOURCE"
+RUN ./bootstrap.sh
+RUN ./configure \
 	--build=$CBUILD \
 	--enable-cyrus \
 	--enable-perl \
@@ -56,29 +36,37 @@ RUN \
 	--localstatedir=/var \
 	--mandir=/usr/share/man \
 	--prefix=/usr \
-	--sysconfdir=/etc && \
- make && \
- make install && \
- echo "**** determine build packages to keep ****" && \
- RUNTIME_PACKAGES="$( \
-	scanelf --needed --nobanner /usr/bin/znc \
+	--sysconfdir=/etc
+RUN make
+RUN make DESTDIR=/tmp/znc install
+
+# determine runtime packages
+RUN scanelf --needed --nobanner /tmp/znc/usr/bin/znc \
 	| awk '{ gsub(/,/, "\nso:", $2); print "so:" $2 }' \
 	| sort -u \
 	| xargs -r apk info --installed \
 	| sort -u \
-	)" && \
- apk add --no-cache \
-	${RUNTIME_PACKAGES} \
-	ca-certificates && \
- echo "**** cleanup ****" && \
- apk del --purge \
-	build-dependencies && \
- rm -rf \
-	/tmp/*
+	>> /tmp/znc/packages
 
-# add local files
-COPY /root /
+FROM alpine:3.8
+LABEL maintainer "Titouan Condé <hi+docker@titouan.co>"
+LABEL org.label-schema.name="ZNC" \
+      org.label-schema.vcs-url="https://git.tycho.space/docker/znc"
 
-# ports and volumes
+ENV UID="991" \
+    GID="991"
+
+COPY --from=buildstage /tmp/znc/usr/ /usr/
+COPY --from=buildstage /tmp/znc/packages /packages
+
+RUN RUNTIME_PACKAGES=$(echo $(cat /packages)) \
+	&& apk add --no-cache ca-certificates runit tini ${RUNTIME_PACKAGES}
+
+COPY root/ /
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 EXPOSE 6501
 VOLUME /config
+
+CMD ["/sbin/tini","--","/usr/local/bin/start.sh"]

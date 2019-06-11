@@ -2,9 +2,9 @@
 
 This image is based on [linuxserver/znc](https://github.com/linuxserver/docker-znc).
 
-[ZNC](http://wiki.znc.in/ZNC) is an IRC network bouncer or BNC. It can detach the client from the actual IRC server, and also from selected channels. Multiple clients from different locations can connect to a single ZNC account simultaneously and therefore appear under the same nickname on IRC.
+[ZNC](https://wiki.znc.in/ZNC) is an IRC network bouncer or BNC. It can detach the client from the actual IRC server, and also from selected channels. Multiple clients from different locations can connect to a single ZNC account simultaneously and therefore appear under the same nickname on IRC.
 
-[![znc](http://wiki.znc.in/resources/assets/wiki.png)](http://wiki.znc.in/ZNC)
+[![znc](https://wiki.znc.in/resources/assets/wiki.png)](https://wiki.znc.in/ZNC)
 
 ## Parameters
 
@@ -48,6 +48,7 @@ To log in to the application, browse to https://<hostip>:6501.
 
 ## Versions
 
++ **31.01.19:** Use alpine 3.9
 + **23.08.18:** Use alpine 3.8 & buildstage.
 + **03.01.18:** Deprecate cpu_core routine lack of scaling.
 + **07.12.17:** Rebase alpine linux 3.7.

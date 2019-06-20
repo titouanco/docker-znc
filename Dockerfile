@@ -1,4 +1,4 @@
-FROM alpine:3.9 as buildstage
+FROM alpine:3.10 as buildstage
 
 ARG ZNC_VER="master"
 
@@ -48,7 +48,7 @@ RUN scanelf --needed --nobanner /tmp/znc/usr/bin/znc \
 	| sort -u \
 	>> /tmp/znc/packages
 
-FROM alpine:3.9
+FROM alpine:3.10
 LABEL maintainer "Titouan Condé <hi+docker@titouan.co>"
 LABEL org.label-schema.name="ZNC" \
       org.label-schema.vcs-url="https://code.titouan.co/titouan/docker-znc"

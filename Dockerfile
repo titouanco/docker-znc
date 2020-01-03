@@ -1,4 +1,4 @@
-FROM alpine:3.10 as buildstage
+FROM alpine:3.11 as buildstage
 
 ARG ZNC_VER="master"
 

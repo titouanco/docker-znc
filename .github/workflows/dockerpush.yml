@@ -6,6 +6,8 @@ on:
       - master
   schedule:
     - cron: '0 2 * * 0'
+  repository_dispatch:
+    types: run-dockerpush
 
 jobs:
   znc-master:

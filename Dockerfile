@@ -42,7 +42,7 @@ RUN scanelf --needed --nobanner /usr/local/bin/znc \
 FROM alpine:3.11
 LABEL maintainer "Titouan Condé <hi+docker@titouan.co>"
 LABEL org.label-schema.name="ZNC" \
-      org.label-schema.vcs-url="https://code.titouan.co/titouan/docker-znc"
+      org.label-schema.vcs-url="https://github.com/titouanco/docker-znc"
 
 ENV UID="991" \
     GID="991"

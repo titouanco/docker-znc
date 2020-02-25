@@ -7,7 +7,7 @@ adduser -D -G abc -u ${UID} abc
 mkdir -p /config/configs
 
 # generate license file
-[[ ! -f /config/znc.pem ]] && /usr/bin/znc -d /config -p
+[[ ! -f /config/znc.pem ]] && /usr/local/bin/znc -d /config -p
 
 while [ ! -f "/config/znc.pem" ]; do
 echo "waiting for pem file to be generated"
@@ -20,4 +20,4 @@ done
 # permissions
 chown -R abc:abc /config
 
-chpst -u abc -U abc -- sh -c '/usr/bin/znc -d /config --foreground'
+chpst -u abc -U abc -- sh -c '/usr/local/bin/znc -d /config --foreground'

@@ -48,7 +48,10 @@ To log in to the application, browse to https://<hostip>:6501.
 
 ## Versions
 
-+ **31.01.19:** Use alpine 3.9
++ **25.02.20:** Switch to cmake to build znc & add znc-palaver.
++ **03.01.20:** Use alpine 3.11.
++ **20.06.19:** Use alpine 3.10.
++ **31.01.19:** Use alpine 3.9.
 + **23.08.18:** Use alpine 3.8 & buildstage.
 + **03.01.18:** Deprecate cpu_core routine lack of scaling.
 + **07.12.17:** Rebase alpine linux 3.7.

@@ -1,6 +1,6 @@
 # znc
 
-This image is based on [linuxserver/znc](https://github.com/linuxserver/docker-znc).
+This repo is a fork of [linuxserver/znc](https://github.com/linuxserver/docker-znc).
 
 [ZNC](https://wiki.znc.in/ZNC) is an IRC network bouncer or BNC. It can detach the client from the actual IRC server, and also from selected channels. Multiple clients from different locations can connect to a single ZNC account simultaneously and therefore appear under the same nickname on IRC.
 
@@ -48,6 +48,7 @@ To log in to the application, browse to https://<hostip>:6501.
 
 ## Versions
 
++ **06.06.20:** Use alpine 3.12.
 + **25.02.20:** Switch to cmake to build znc & add znc-palaver.
 + **03.01.20:** Use alpine 3.11.
 + **20.06.19:** Use alpine 3.10.
